@@ -27,7 +27,7 @@ function toBoardData(gameData, numRows, numCols){
 
 }
 
-//function to determine if the game is over and what is the outcome in said case
+//function to determine if the game is won
 function isGameWon(lastPlayerPos, boardData){
 
     //console.log("@isGameWon");
@@ -115,9 +115,9 @@ function isGameWon(lastPlayerPos, boardData){
 
     if(canCheckLeft){
         potentialWinSequence = [];
-        //console.log("@left check")
-        potentialWinSequence =boardData[playerRowPos].slice(0,lastPlayerPos + 1).filter((val)=>val === playerVal);
-        //console.log("potential win sequence: ", potentialWinSequence)
+        console.log("@left check")
+        potentialWinSequence =boardData[playerRowPos].slice(lastPlayerPos - 3,lastPlayerPos + 1).filter((val)=>val === playerVal);
+        console.log("potential win sequence: ", potentialWinSequence)
         if(potentialWinSequence.length === 4) return true;
 
 
@@ -175,6 +175,27 @@ function isGameWon(lastPlayerPos, boardData){
 }
 
 
+//function to determine if the game is a draw
+function isDraw(boardData){
+    return !boardData[0].includes(0);
+}
+
+//function to get the game over object
+function getGameOverStatus(lastPlayerPos, boardData){
+    const gameOver = {status: false, outcome: ""};
+
+    if(isGameWon(lastPlayerPos, boardData)){
+        gameOver.status = true;
+        gameOver.outcome = "GAME_WON";
+    }
+    else if(isDraw(boardData)){
+        gameOver.status = true;
+        gameOver.outcome = "DRAW";
+    }
+    
+    return gameOver;
+}
+
 
 
 
@@ -198,7 +219,7 @@ function GameSection({numRows = 7, numCols = 5}){
                 case "ArrowLeft":
                     setPiecePosition(prev=>(prev > 0 ? prev - 1 : prev));
                     break;
-                case " ":
+                case "d":
                     if(gameData[piecePosition].length < numRows){
                         setGameData(prev=>prev.map((row, rowIndex)=>{
                             let newRow = [...row];
@@ -227,7 +248,7 @@ function GameSection({numRows = 7, numCols = 5}){
 
     //extract board data from game data
     const boardData = toBoardData(gameData, numRows, numCols);
-    const isGameOver = isGameWon(piecePosition, boardData);
+    const isGameOver = getGameOverStatus(piecePosition, boardData);
 
     let lastPlayer = playerVal === 1 ? 2 : 1;
     
@@ -241,7 +262,7 @@ function GameSection({numRows = 7, numCols = 5}){
             <div className="flex items-center justify-center">
                 <Board numRows={numRows} numCols={numCols} boardData={boardData}/>
             </div>
-            {isGameOver && <p className="text-center">{`player ${lastPlayer} won the game.`}</p>}
+            {isGameOver.status === true && <p className="text-center">{isGameOver.outcome === "DRAW" ? "Game ended in a draw" : `player ${lastPlayer} won the game.`}</p>}
             
         </div>
     )
