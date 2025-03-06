@@ -1,18 +1,28 @@
+function ReportSection() {
+    return (
+        <section className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold text-center text-gray-800 mb-3">
+                Share Your Feedback
+            </h2>
+            <p className="text-gray-600 text-center mb-4">
+                Did you enjoy your experience? Encountered any bugs? Let me know!
+            </p>
 
-//form that the player/user can use to share their review of the experience
-function ReportSection(){
-    return(
-    <form className="flex flex-col gap-2">
-        <label className="font-bold text-center">Did You Enjoy Your Experience? Did you encounter any bugs? Let me know what you think down below! :</label>
-        <textarea className="rounded-md shadow-md border-1"></textarea>
-        <div className="flex items-center justify-center">
-        <button className="bg-blue-400 rounded-md hover:bg-blue-500 p-2">
-            Submit Report
-        </button>
-        </div>
-        
-    </form>
-    )
+            <form className="flex flex-col gap-4">
+                <textarea
+                    className="w-full h-32 p-3 rounded-md shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                    placeholder="Write your feedback here..."
+                ></textarea>
+
+                <button 
+                    type="submit"
+                    className="bg-blue-500 text-white font-medium rounded-md py-2 transition-all duration-300 hover:bg-blue-600 active:scale-95"
+                >
+                    Submit Feedback
+                </button>
+            </form>
+        </section>
+    );
 }
 
 export default ReportSection;
