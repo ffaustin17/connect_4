@@ -196,6 +196,10 @@ function getGameOverStatus(lastPlayerPos, boardData){
     return gameOver;
 }
 
+//function to get empty board
+function getEmptyBoard(numRows){
+    return Array.from({length: numRows}, ()=>Array());
+}
 
 function GameSection({numRows = 7, numCols = 5}){
     console.log(`component (re-)rendered`);
@@ -204,7 +208,7 @@ function GameSection({numRows = 7, numCols = 5}){
     //console.log("game section rendered.")
     //how the game board is stored at first. We follow a stack based matrix at first because of the nature of the game
     //the data will have to be appropriately transformed for rendering purposes
-    const [gameData, setGameData] = useState(Array(numRows).fill(Array()));
+    const [gameData, setGameData] = useState(getEmptyBoard(numRows));
     const [piecePosition, setPiecePosition] = useState(0);
     const [playerVal, setPlayerVal] = useState(1);
     const [aiTargetPos, setAiTargetPos] = useState(null); //helps the AI remember where it wants to drop the piece across re-renders
@@ -214,6 +218,14 @@ function GameSection({numRows = 7, numCols = 5}){
     const isGameOver = getGameOverStatus(piecePosition, boardData);
 
     //-------------logic-----------------------------------------------------
+
+    //reset logic
+    const handleReset = () =>{
+        setGameData(getEmptyBoard());
+        setPiecePosition(0);
+        setPlayerVal(1);
+        setAiTargetPos(null);
+    }
 
     //AI movemement logic
     const handleAIMove = useCallback( () =>{
@@ -376,7 +388,17 @@ function GameSection({numRows = 7, numCols = 5}){
             <div className="flex items-center justify-center">
                 <Board numRows={numRows} numCols={numCols} boardData={boardData}/>
             </div>
-            {isGameOver.status === true && <p className="text-center">{isGameOver.outcome === "DRAW" ? "Game ended in a draw" : `player ${lastPlayer} won the game.`}</p>}
+            {isGameOver.status === true && (
+                <div className="flex flex-col items-center justify-center">
+                    <p>{isGameOver.outcome === "DRAW" ? "Game ended in a draw" : `player ${lastPlayer} won the game.`}</p>
+                    <button 
+                        className="bg-blue-500 hover:bg-blue-600 cursor-pointer p-4 text-white rounded-lg"
+                        onClick={handleReset}
+                        >Start another game
+                    </button>
+                </div>
+                
+            )}
             
         </div>
     )
