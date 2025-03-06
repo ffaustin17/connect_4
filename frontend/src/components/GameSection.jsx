@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Board from "./Board";
 import MovementPane from "./MovementPane";
 
@@ -197,62 +197,128 @@ function getGameOverStatus(lastPlayerPos, boardData){
 }
 
 
-
+// pause funcion used to better visualize AI movement before dropping a piece
+function pause(time){
+    return new Promise(resolve => setTimeout(resolve, time));
+}
 
 function GameSection({numRows = 7, numCols = 5}){
+
+    //-------------state variables-----------------------------------------------------
+
     //console.log("game section rendered.")
     //how the game board is stored at first. We follow a stack based matrix at first because of the nature of the game
     //the data will have to be appropriately transformed for rendering purposes
     const [gameData, setGameData] = useState(Array(numRows).fill(Array()));
     const [piecePosition, setPiecePosition] = useState(0);
     const [playerVal, setPlayerVal] = useState(1);
-
-
-    //useeffect to listen for keydown events and change the piece position accordingly
-    useEffect(()=>{
-        //console.log("@useEffect 1");
-        function handleKeyDown(event){
-            switch(event.key){
-                case "ArrowRight":
-                    setPiecePosition(prev=>(prev < (numCols - 1) ? prev + 1 : prev));
-                    break;
-                case "ArrowLeft":
-                    setPiecePosition(prev=>(prev > 0 ? prev - 1 : prev));
-                    break;
-                case "d":
-                    if(gameData[piecePosition].length < numRows){
-                        setGameData(prev=>prev.map((row, rowIndex)=>{
-                            let newRow = [...row];
-
-                            if(rowIndex === piecePosition) newRow.push(playerVal);
-
-                            return newRow;
-                        }));
-
-                        setPlayerVal(prev => prev === 1 ? 2 : 1);
-                }
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        //add key listener
-        window.addEventListener("keydown", handleKeyDown);
-
-        //remove event listener on unmount
-        return ()=>window.removeEventListener("keydown", handleKeyDown);
-    }, [numCols,numRows, piecePosition, playerVal, gameData])
-
-
+    const [aiTargetPos, setAiTargetPos] = useState(null); //helps the AI remember where it wants to drop the piece across re-renders
 
     //extract board data from game data
     const boardData = toBoardData(gameData, numRows, numCols);
     const isGameOver = getGameOverStatus(piecePosition, boardData);
 
+    //-------------logic-----------------------------------------------------
+
+    //AI movemement logic
+    const handleAIMove = useCallback(async () =>{
+        let targetColumn; //the col the AI intends to move at a particular render
+
+        if(aiTargetPos === null){
+            const availableCols = [];
+
+            //Find all valid columns
+            for(let col = 0; col < numCols; col++){
+                if(gameData[col].length < numRows){
+                    availableCols.push(col);
+                }
+            }
+
+            if(availableCols.length === 0) return; //no valid moves
+
+            targetColumn = availableCols[Math.floor(Math.random()* availableCols.length)]; //random ai move for now
+            setAiTargetPos(targetColumn); //store target for next render.
+        }
+        else{
+            targetColumn = aiTargetPos;
+        }
+
+        //delay ai move to make it more visually engaging and simulate thinking
+        await pause(500);
+
+        if(piecePosition < targetColumn){
+            setPiecePosition(prev => prev + 1);
+        }
+        else if(piecePosition > targetColumn){
+            setPiecePosition(prev => prev - 1);
+        }
+        else{
+            setGameData(prev=>prev.map((row, rowIndex)=>{
+                let newRow = [...row];
+
+                if(rowIndex === piecePosition) newRow.push(playerVal);
+
+                return newRow;
+            }));
+
+            setPlayerVal(prev => prev === 1 ? 2 : 1);
+            setAiTargetPos(null);
+        }
+    }, [aiTargetPos, gameData, numCols, numRows, piecePosition, playerVal]);
+
+    //useEffect to listen for keydown events and change the piece position accordingly
+    useEffect(()=>{
+
+        if(isGameOver.status === true) return;
+
+        //only listen for keyboard input when it is the player's turn
+        if(playerVal !== 1){
+            handleAIMove();
+        }
+        else{
+            //console.log("@useEffect 1");
+            function handleKeyDown(event){
+                switch(event.key){
+                    case "ArrowRight":
+                        setPiecePosition(prev=>(prev < (numCols - 1) ? prev + 1 : prev));
+                        break;
+                    case "ArrowLeft":
+                        setPiecePosition(prev=>(prev > 0 ? prev - 1 : prev));
+                        break;
+                    case "d":
+                        if(gameData[piecePosition].length < numRows){
+                            setGameData(prev=>prev.map((row, rowIndex)=>{
+                                let newRow = [...row];
+
+                                if(rowIndex === piecePosition) newRow.push(playerVal);
+
+                                return newRow;
+                            }));
+
+                            setPlayerVal(prev => prev === 1 ? 2 : 1);
+                    }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            //add key listener
+            window.addEventListener("keydown", handleKeyDown);
+
+            //remove event listener on unmount
+            return ()=>window.removeEventListener("keydown", handleKeyDown);
+        }
+    }, [numCols, numRows, piecePosition, playerVal, gameData, handleAIMove, isGameOver.status])
+
+
+    
+
+    
     let lastPlayer = playerVal === 1 ? 2 : 1;
     
 
+    //-------------Rendering-----------------------------------------------------
 
     return(
         <div className="flex flex-col py-4 px-8 gap-2 rounded-md shadow-md">
