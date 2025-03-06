@@ -5,7 +5,7 @@ function ReportSection() {
                 Share Your Feedback
             </h2>
             <p className="text-gray-600 text-center mb-4">
-                Did you enjoy your experience? Encountered any bugs? Let us know!
+                Did you enjoy your experience? Encountered any bugs? Let me know!
             </p>
 
             <form className="flex flex-col gap-4">
