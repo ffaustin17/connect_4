@@ -198,7 +198,7 @@ function getGameOverStatus(lastPlayerPos, boardData){
 
 //function to get empty board
 function getEmptyBoard(numRows){
-    return Array.from({length: numRows}, ()=>Array());
+    return Array.from({length: numRows}, ()=>[]);
 }
 
 function GameSection({numRows = 7, numCols = 5}){
@@ -217,11 +217,13 @@ function GameSection({numRows = 7, numCols = 5}){
     const boardData = toBoardData(gameData, numRows, numCols);
     const isGameOver = getGameOverStatus(piecePosition, boardData);
 
+    //console.log(boardData);
+
     //-------------logic-----------------------------------------------------
 
     //reset logic
     const handleReset = () =>{
-        setGameData(getEmptyBoard());
+        setGameData(getEmptyBoard(numRows));
         setPiecePosition(0);
         setPlayerVal(1);
         setAiTargetPos(null);
@@ -303,6 +305,8 @@ function GameSection({numRows = 7, numCols = 5}){
                         setPiecePosition(prev=>(prev > 0 ? prev - 1 : prev));
                         break;
                     case "d":
+                        console.log("in d condition")
+                        console.log(gameData)
                         if(gameData[piecePosition].length < numRows){
                             setGameData(prev=>prev.map((row, rowIndex)=>{
                                 let newRow = [...row];
