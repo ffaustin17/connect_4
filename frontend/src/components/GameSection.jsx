@@ -229,58 +229,13 @@ function GameSection({numRows = 7, numCols = 5}){
 
     //AI movemement logic
     const handleAIMove = useCallback( () =>{
-        console.log(`@handleAIMove`);
-
-        // let targetColumn; //the col the AI intends to move at a particular render
-
-        // if(aiTargetPos === null){
-        //     console.log(`ai target position is null - determining it right now`)
-        //     const availableCols = [];
-
-        //     //Find all valid columns
-        //     for(let col = 0; col < numCols; col++){
-        //         if(gameData[col].length < numRows){
-        //             availableCols.push(col);
-        //         }
-        //     }
-
-        //     if(availableCols.length === 0) return; //no valid moves
-
-        //     targetColumn = availableCols[Math.floor(Math.random()* availableCols.length)]; //random ai move for now
-        //     setAiTargetPos(targetColumn); //store target for next render.
-        // }
-        // else{
-        //     targetColumn = aiTargetPos;
-        // }
-
-        // console.log(`ai target and targetColumn are found. The value is: ${targetColumn}`);
-
-
-        // console.log(`The current value of piecePosition is ${piecePosition}`)
-        // if(piecePosition < targetColumn){
-        //     setPiecePosition(prev => prev + 1);
-        // }
-        // else if(piecePosition > targetColumn){
-        //     setPiecePosition(prev => prev - 1);
-        // }
-        // else{
-        //     setGameData(prev=>prev.map((row, rowIndex)=>{
-        //         let newRow = [...row];
-
-        //         if(rowIndex === piecePosition) newRow.push(playerVal);
-
-        //         return newRow;
-        //     }));
-
-        //     setPlayerVal(prev => prev === 1 ? 2 : 1);
-        //     setAiTargetPos(null);
-        // }
+        //console.log(`@handleAIMove`);
 
         setTimeout(()=>{
             let targetColumn; //the col the AI intends to move at a particular render
 
             if(aiTargetPos === null){
-                console.log(`ai target position is null - determining it right now`)
+                //console.log(`ai target position is null - determining it right now`)
                 const availableCols = [];
 
                 //Find all valid columns
@@ -299,7 +254,7 @@ function GameSection({numRows = 7, numCols = 5}){
                 targetColumn = aiTargetPos;
             }
 
-            console.log(`ai target and targetColumn are found. The value is: ${targetColumn}`);
+            //console.log(`ai target and targetColumn are found. The value is: ${targetColumn}`);
 
 
             console.log(`The current value of piecePosition is ${piecePosition}`)
@@ -328,7 +283,7 @@ function GameSection({numRows = 7, numCols = 5}){
 
     //useEffect to listen for keydown events and change the piece position accordingly
     useEffect(()=>{
-        console.log(`useEffect is called.`);
+        //console.log(`useEffect is called.`);
 
         if(isGameOver.status === true) return;
 
