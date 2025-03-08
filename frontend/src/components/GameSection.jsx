@@ -112,7 +112,7 @@ function GameSection({numRows = 7, numCols = 5}){
             //console.log(`ai target and targetColumn are found. The value is: ${targetColumn}`);
 
 
-            console.log(`The current value of piecePosition is ${piecePosition}`)
+            //console.log(`The current value of piecePosition is ${piecePosition}`)
             if(piecePosition < targetColumn){
                 setPiecePosition(prev => prev + 1);
             }

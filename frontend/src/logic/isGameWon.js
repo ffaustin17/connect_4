@@ -1,7 +1,6 @@
 //function to determine if the game is won
 export default function isGameWon(lastPlayerCol, boardData){
     const num_rows = boardData.length;
-    const num_cols = boardData[0].length;
 
     //determine who was the last player and fully locate where they last played
     let lastPlayerRow;
@@ -9,7 +8,6 @@ export default function isGameWon(lastPlayerCol, boardData){
 
     for(let rowIndex = 0; rowIndex < num_rows; rowIndex++){
         if(boardData[rowIndex][lastPlayerCol] !== 0){
-            //console.log("entered the condition")
             playerVal = boardData[rowIndex][lastPlayerCol];
             lastPlayerRow = rowIndex;
 
@@ -23,6 +21,14 @@ export default function isGameWon(lastPlayerCol, boardData){
     //get the reference points for each directions
     let currCol;
     let currRow;
+
+    //track the distances of each reference points with the cell played by the last player
+    let rightDistance = 0;
+    let leftDistance = 0;
+    let rightTopDistance = 0;
+    let rightBottomDistance = 0;
+    let leftTopDistance = 0;
+    let leftBottomDistance = 0;
 
     //get the col position of the rightmost uninterrupted cell for left checks
     let rightmostCellCol;
@@ -42,6 +48,7 @@ export default function isGameWon(lastPlayerCol, boardData){
         }
 
         rightmostCellCol = currCol;
+        if(i !== 0) rightDistance++;
     }
 
     //get the col position of the leftmost uninterrupted cell for right checks
@@ -63,7 +70,10 @@ export default function isGameWon(lastPlayerCol, boardData){
         
 
         leftmostCellCol = currCol;
+        if(i !== 0) leftDistance++;
     }
+    
+    if(rightDistance + leftDistance >= 3) return true;
 
     //get the row position of the uppermost uninterrupted cell for down checks
     let uppermostCellRow = lastPlayerRow;
@@ -91,7 +101,37 @@ export default function isGameWon(lastPlayerCol, boardData){
 
         rightDiagonalTop.row = currRow;
         rightDiagonalTop.col = currCol;
+
+        if(i !== 0) rightTopDistance++;
     }
+
+    //get the row and col positions of the top cell in the right diagonal line from the last player cell
+    let leftDiagonalBottom = {row: 0, pos: 0};
+
+    for(let i = 0; i < 4; i++){
+        currCol = lastPlayerCol - i;
+        currRow = lastPlayerRow + i;
+
+        try{
+            if(boardData[currRow][currCol] !== playerVal){
+                leftDiagonalBottom.row = currRow - 1;
+                leftDiagonalBottom.col = currCol + 1;
+                break;
+            }
+        }
+        catch{
+            leftDiagonalBottom.row = currRow - 1;
+            leftDiagonalBottom.col = currCol + 1;
+            break;
+        }
+
+        leftDiagonalBottom.row = currRow;
+        leftDiagonalBottom.col = currCol;
+
+        if(i !== 0 ) leftBottomDistance++;
+    }
+
+    if(rightTopDistance + leftBottomDistance >= 3) return true;
 
     //get the row and col positions of the top cell in the right diagonal line from the last player cell
     let rightDiagonalBottom = {row: 0, pos: 0};
@@ -117,6 +157,7 @@ export default function isGameWon(lastPlayerCol, boardData){
         rightDiagonalBottom.row = currRow;
         rightDiagonalBottom.col = currCol;
 
+        if(i !== 0 ) rightBottomDistance++;
     }
 
     //get the row and col positions of the top cell in the right diagonal line from the last player cell
@@ -142,116 +183,15 @@ export default function isGameWon(lastPlayerCol, boardData){
         leftDiagonalTop.row = currRow;
         leftDiagonalTop.col = currCol;
 
+        if(i !== 0) leftTopDistance++;
     }
 
-    //get the row and col positions of the top cell in the right diagonal line from the last player cell
-    let leftDiagonalBottom = {row: 0, pos: 0};
+    if(leftTopDistance + rightBottomDistance >= 3) return true;
 
-    for(let i = 0; i < 4; i++){
-        currCol = lastPlayerCol - i;
-        currRow = lastPlayerRow + i;
-
-        try{
-            if(boardData[currRow][currCol] !== playerVal){
-                leftDiagonalBottom.row = currRow - 1;
-                leftDiagonalBottom.col = currCol + 1;
-                break;
-            }
-        }
-        catch{
-            leftDiagonalBottom.row = currRow - 1;
-            leftDiagonalBottom.col = currCol + 1;
-            break;
-        }
-
-        leftDiagonalBottom.row = currRow;
-        leftDiagonalBottom.col = currCol;
-    }
-
-    //to let us know if we should even attempt checks
-    let canCheckRight = (leftmostCellCol + 3 < num_cols);
-    let canCheckLeft = (rightmostCellCol  >= 3);
     let canCheckDown = (uppermostCellRow <= 3);
-
-    //diagonal checks
-    let canCheckRightDiagonalFromTop = leftDiagonalTop.row <= 3 && (leftDiagonalTop.col + 3 < num_cols);
-    let canCheckRightDiagonalFromBottom = leftDiagonalBottom.row >= 3 && (leftDiagonalBottom.col + 3 < num_cols);
-    let canCheckLeftDiagonalFromTop = rightDiagonalTop.row <= 3 && (rightDiagonalTop.col >= 3);
-    let canCheckLeftDiagonalFromBottom = rightDiagonalBottom.row >= 3 && (rightDiagonalBottom.col >= 3);
-
 
     //actual win sequence checks
     let potentialWinSequence = [];
-
-    if(canCheckRight){
-        potentialWinSequence = boardData[lastPlayerRow].slice(leftmostCellCol, leftmostCellCol + 4).filter((val)=> val === playerVal);
-        if(potentialWinSequence.length === 4) return true;
-    }
-
-    //check right-down diagonal
-    if(canCheckRightDiagonalFromTop){
-        potentialWinSequence = [];
-        let currentRowIndex = leftDiagonalTop.row;
-        let currentColIndex = leftDiagonalTop.col;
-
-        for(let i = 0; i < 4; i++){
-            potentialWinSequence.push(boardData[currentRowIndex][currentColIndex]);
-            currentRowIndex++;
-            currentColIndex++;
-        }
-
-        if(potentialWinSequence.filter((val)=> val === playerVal).length === 4) return true;
-    }
-
-    //check right-up diagonal
-    if(canCheckRightDiagonalFromBottom){
-        potentialWinSequence = [];
-        let currentRowIndex = leftDiagonalBottom.row;
-        let currentColIndex = leftDiagonalBottom.col;
-
-        for(let i = 0; i < 4; i++){
-            potentialWinSequence.push(boardData[currentRowIndex][currentColIndex]);
-            currentRowIndex--;
-            currentColIndex++;
-        }
-
-        if(potentialWinSequence.filter((val)=> val === playerVal).length === 4) return true;
-    }
-
-    if(canCheckLeft){
-        potentialWinSequence = [];
-        potentialWinSequence =boardData[lastPlayerRow].slice(rightmostCellCol - 3, rightmostCellCol + 1).filter((val)=>val === playerVal);
-        if(potentialWinSequence.length === 4) return true;
-    }
-
-    //check left-up diagonal
-    if(canCheckLeftDiagonalFromTop){
-        potentialWinSequence = [];
-        let currentRowIndex = rightDiagonalTop.row;
-        let currentColIndex = rightDiagonalTop.col;
-
-        for(let i = 0; i < 4; i++){
-            potentialWinSequence.push(boardData[currentRowIndex][currentColIndex]);
-            currentRowIndex++;
-            currentColIndex--;
-        }
-
-        if(potentialWinSequence.filter((val)=> val === playerVal).length === 4) return true;
-    }
-    //check right-up diagonal
-    if(canCheckLeftDiagonalFromBottom){
-        potentialWinSequence = [];
-        let currentRowIndex = rightDiagonalBottom.row;
-        let currentColIndex = rightDiagonalBottom.col;
-
-        for(let i = 0; i < 4; i++){
-            potentialWinSequence.push(boardData[currentRowIndex][currentColIndex]);
-            currentRowIndex--;
-            currentColIndex--;
-        }
-
-        if(potentialWinSequence.filter((val)=> val === playerVal).length === 4) return true;
-    }
 
     if(canCheckDown){
         potentialWinSequence = [];
