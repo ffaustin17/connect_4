@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Board from "./Board";
 import MovementPane from "./MovementPane";
+import isGameWon from "../logic/isGameWon";
 
 function toBoardData(gameData, numRows, numCols){
     const boardData = Array.from({length: numRows}, ()=>Array(numCols).fill(0));
@@ -26,154 +27,6 @@ function toBoardData(gameData, numRows, numCols){
     return boardData;
 
 }
-
-//function to determine if the game is won
-function isGameWon(lastPlayerPos, boardData){
-
-    //console.log("@isGameWon");
-    //console.log(boardData)
-
-    //console.log(`last player pos: ${lastPlayerPos}`);
-
-    const num_rows = boardData.length;
-    const num_cols = boardData[0].length;
-
-    //console.log(num_rows);
-    //console.log(num_cols);
-
-    let playerRowPos;
-    let playerVal;
-
-    //find who the last player was and the row where they played in the board.
-    for(let rowIndex = 0; rowIndex < num_rows; rowIndex++){
-        //console.log("@ the loop")
-
-        if(boardData[rowIndex][lastPlayerPos] !== 0){
-            //console.log("entered the condition")
-            playerVal = boardData[rowIndex][lastPlayerPos];
-            playerRowPos = rowIndex;
-
-            break;
-        }
-    }
-
-
-    //console.log(`player val: ${playerVal}`);
-    //console.log(`player row pos: ${playerRowPos}`);
-
-    if(!playerVal && !playerRowPos) return false; 
-
-    //to let us know if we should even attempt checks
-    let canCheckRight = (lastPlayerPos + 3 < num_cols);
-    let canCheckLeft = (lastPlayerPos  >= 3);
-    let canCheckDown = (playerRowPos <= 3);
-    let canCheckUp = (playerRowPos >= 3); //this one is just for diagonal checks
-
-    let potentialWinSequence = [];
-
-    if(canCheckRight){
-        //console.log("@right check")
-        potentialWinSequence = boardData[playerRowPos].slice(lastPlayerPos, lastPlayerPos + 4).filter((val)=> val === playerVal);
-        //console.log(`potential win sequence: ${potentialWinSequence}`)
-        if(potentialWinSequence.length === 4) return true;
-
-        //check right-up diagonal
-        if(canCheckUp){
-            let diagonalSequence = [];
-            let currentRowIndex = playerRowPos;
-            let currentColIndex = lastPlayerPos;
-
-            for(let i = 0; i < 4; i++){
-
-                diagonalSequence.push(boardData[currentRowIndex][currentColIndex]);
-                currentRowIndex--;
-                currentColIndex++;
-            }
-
-            potentialWinSequence = diagonalSequence.filter((val)=> val === playerVal);
-
-            if(potentialWinSequence.length === 4) return true;
-        }
-
-        //check right-down diagonal
-        if(canCheckDown){
-            potentialWinSequence = [];
-            let currentRowIndex = playerRowPos;
-            let currentColIndex = lastPlayerPos;
-
-            for(let i = 0; i < 4; i++){
-
-                potentialWinSequence.push(boardData[currentRowIndex][currentColIndex]);
-                currentRowIndex++;
-                currentColIndex++;
-            }
-
-            if(potentialWinSequence.filter((val)=> val === playerVal).length === 4) return true;
-        }
-
-    }
-
-    if(canCheckLeft){
-        potentialWinSequence = [];
-        //console.log("@left check")
-        potentialWinSequence =boardData[playerRowPos].slice(lastPlayerPos - 3,lastPlayerPos + 1).filter((val)=>val === playerVal);
-        //console.log("potential win sequence: ", potentialWinSequence)
-        if(potentialWinSequence.length === 4) return true;
-
-
-        //check right-up diagonal
-        if(canCheckUp){
-            let diagonalSequence = [];
-            let currentRowIndex = playerRowPos;
-            let currentColIndex = lastPlayerPos;
-
-            for(let i = 0; i < 4; i++){
-
-                diagonalSequence.push(boardData[currentRowIndex][currentColIndex]);
-                currentRowIndex--;
-                currentColIndex--;
-            }
-
-            potentialWinSequence = diagonalSequence.filter((val)=> val === playerVal);
-
-            if(potentialWinSequence.length === 4) return true;
-        }
-
-        //check right-down diagonal
-        if(canCheckDown){
-            potentialWinSequence = [];
-            let currentRowIndex = playerRowPos;
-            let currentColIndex = lastPlayerPos;
-
-            for(let i = 0; i < 4; i++){
-
-                potentialWinSequence.push(boardData[currentRowIndex][currentColIndex]);
-                currentRowIndex++;
-                currentColIndex--;
-            }
-
-            if(potentialWinSequence.filter((val)=> val === playerVal).length === 4) return true;
-        }
-        
-    }
-
-    if(canCheckDown){
-        potentialWinSequence = [];
-        //console.log("@down check")
-
-        for(let rowIndex = playerRowPos; rowIndex < playerRowPos + 4; rowIndex++){
-            potentialWinSequence.push(boardData[rowIndex][lastPlayerPos]);
-        }
-
-        //console.log(`potential win sequence: ${potentialWinSequence}`)
-        if(potentialWinSequence.filter((val)=>val === playerVal).length === 4) return true;
-    }
-
-    //console.log("didn't pass any checks")
-
-    return false;
-}
-
 
 //function to determine if the game is a draw
 function isDraw(boardData){
@@ -278,7 +131,7 @@ function GameSection({numRows = 7, numCols = 5}){
                 setPlayerVal(prev => prev === 1 ? 2 : 1);
                 setAiTargetPos(null);
             }
-            }, 500);
+            }, 1000);
     }, [aiTargetPos, gameData, numCols, numRows, piecePosition, playerVal]);
 
 
