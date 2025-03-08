@@ -8,8 +8,9 @@ function ReportSection() {
                 Did you enjoy your experience? Encountered any bugs? Let me know!
             </p>
 
-            <form className="flex flex-col gap-4">
+            <form id="report-form" className="flex flex-col gap-4">
                 <textarea
+                    name="comment-area"
                     className="w-full h-32 p-3 rounded-md shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
                     placeholder="Write your feedback here..."
                 ></textarea>
